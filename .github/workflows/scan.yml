@@ -1,0 +1,30 @@
+name: Dependency-Check Scan for spring-data-neo4j 6.3.18
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  scan:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v4
+
+      - name: Setup JDK 11
+        uses: actions/setup-java@v4
+        with:
+          java-version: '11'
+          distribution: 'temurin'
+          cache: maven
+          # 加载根目录的settings.xml，使用阿里云镜像
+          maven-settings-file: '${{ github.workspace }}/settings.xml'
+
+      - name: Run OWASP Dependency-Check
+        run: mvn dependency-check:check
+
+      - name: Upload HTML Report
+        uses: actions/upload-artifact@v4
+        with:
+          name: dc-report-html
+          path: target/report/
