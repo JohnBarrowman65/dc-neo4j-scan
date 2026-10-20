@@ -7,12 +7,12 @@ on:
 jobs:
   scan:
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     steps:
       - name: Checkout source
         uses: actions/checkout@v4
 
-      # ✅ 手动写入阿里云settings，保证镜像一定生效（重点改动！）
-      - name: Prepare maven settings (aliyun mirror)
+      - name: Prepare Maven settings (Aliyun mirror)
         run: |
           mkdir -p ~/.m2
           cat > ~/.m2/settings.xml <<'EOF'
@@ -22,39 +22,37 @@ jobs:
     <mirror>
       <id>aliyunmaven</id>
       <mirrorOf>central</mirrorOf>
-      <name>阿里云公共仓库</name>
+      <name>阿里云 public mirror</name>
       <url>https://maven.aliyun.com/repository/public</url>
     </mirror>
   </mirrors>
 </settings>
 EOF
 
-      - name: Cache OWASP DC Database
+      - name: Cache Dependency-Check NVD database
         uses: actions/cache@v4
         with:
           path: ~/.dependency-check
           key: dc-db-${{ hashFiles('pom.xml') }}
           restore-keys: dc-db-
 
-      - name: Cache Maven repository 【新增maven本地仓库缓存，大幅提速】
+      - name: Setup JDK 11
+        uses: actions/setup-java@v4
+        with:
+          java-version: '11'
+          distribution: 'temurin'
+          # 移除 cache: maven，避免和手动缓存冲突
+          # 不再传入 maven-settings-file 参数
+
+      - name: Cache Maven repository
         uses: actions/cache@v4
         with:
           path: ~/.m2/repository
           key: maven-repo-${{ hashFiles('pom.xml') }}
           restore-keys: maven-repo-
 
-      - name: Setup JDK 11
-        uses: actions/setup-java@v4
-        with:
-          java-version: '11'
-          distribution: 'temurin'
-          cache: maven
-          # 删掉 maven-settings-file 这一行，不再用它，避免不生效的坑
-
       - name: Run OWASP Dependency-Check
         run: mvn dependency-check:check -DnvdApiKey=${{ secrets.NVD_API_KEY }} -DnvdApiDelay=3000 -DnvdMaxRetryCount=5
-        env:
-          NVD_API_KEY: ${{ secrets.NVD_API_KEY }}
 
       - name: Upload HTML Report
         uses: actions/upload-artifact@v4
