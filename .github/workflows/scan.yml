@@ -11,13 +11,19 @@ jobs:
       - name: Checkout source
         uses: actions/checkout@v4
 
+      - name: Cache OWASP DC Database
+        uses: actions/cache@v4
+        with:
+          path: ~/.dependency-check
+          key: dc-db-${{ hashFiles('pom.xml') }}
+          restore-keys: dc-db-
+
       - name: Setup JDK 11
         uses: actions/setup-java@v4
         with:
           java-version: '11'
           distribution: 'temurin'
           cache: maven
-          # 加载根目录的settings.xml，使用阿里云镜像
           maven-settings-file: '${{ github.workspace }}/settings.xml'
 
       - name: Run OWASP Dependency-Check
