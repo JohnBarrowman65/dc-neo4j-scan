@@ -15,19 +15,10 @@ jobs:
       - name: Prepare Maven settings (Aliyun mirror)
         run: |
           mkdir -p ~/.m2
-          cat > ~/.m2/settings.xml <<'EOF'
-<?xml version="1.0" encoding="UTF-8"?>
-<settings xmlns="http://maven.apache.org/SETTINGS/1.2.0">
-  <mirrors>
-    <mirror>
-      <id>aliyunmaven</id>
-      <mirrorOf>central</mirrorOf>
-      <name>阿里云 public mirror</name>
-      <url>https://maven.aliyun.com/repository/public</url>
-    </mirror>
-  </mirrors>
-</settings>
-EOF
+          echo -e '<?xml version="1.0" encoding="UTF-8"?>\n<settings xmlns="http://maven.apache.org/SETTINGS/1.2.0">\n  <mirrors>\n    <mirror>\n      <id>aliyunmaven</id>\n      <mirrorOf>central</mirrorOf>\n      <name>阿里云 public mirror</name>\n      <url>https://maven.aliyun.com/repository/public</url>\n    </mirror>\n  </mirrors>\n</settings>' > ~/.m2/settings.xml
+
+      - name: Debug - print maven settings
+        run: cat ~/.m2/settings.xml
 
       - name: Cache Dependency-Check NVD database
         uses: actions/cache@v4
@@ -41,8 +32,6 @@ EOF
         with:
           java-version: '11'
           distribution: 'temurin'
-          # 移除 cache: maven，避免和手动缓存冲突
-          # 不再传入 maven-settings-file 参数
 
       - name: Cache Maven repository
         uses: actions/cache@v4
