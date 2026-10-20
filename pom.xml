@@ -6,6 +6,7 @@
     <groupId>demo</groupId>
     <artifactId>neo4j-scan</artifactId>
     <version>1.0</version>
+
     <dependencies>
         <dependency>
             <groupId>org.springframework.data</groupId>
@@ -14,6 +15,7 @@
             <scope>provided</scope>
         </dependency>
     </dependencies>
+
     <build>
         <plugins>
             <plugin>
@@ -21,18 +23,27 @@
                 <artifactId>dependency-check-maven</artifactId>
                 <version>13.0.0</version>
                 <configuration>
+                    <!-- 传入NVD密钥 -->
+                    <nvdApiKey>${NVD_API_KEY}</nvdApiKey>
+                    <nvdValidApiKeyCheck>false</nvdValidApiKeyCheck>
+
+                    <!-- CVSS阈值设为11（最高只有10，漏洞不会让构建失败） -->
                     <failBuildOnCVSS>11</failBuildOnCVSS>
                     <format>HTML</format>
                     <outputDirectory>target/report</outputDirectory>
+
+                    <!-- 仅扫描provided作用域的依赖 -->
                     <scanConfigurations>
                         <scanConfiguration>provided</scanConfiguration>
                     </scanConfigurations>
+
+                    <!-- 排除所有传递依赖，只保留我们显式声明的包 -->
                     <excludedDependencies>
                         <excludedDependency>*:*</excludedDependency>
                     </excludedDependencies>
+
+                    <!-- 漏洞压制文件，根目录的suppression.xml -->
                     <suppressionFile>suppression.xml</suppressionFile>
-                    <!-- 新增：不校验NVD API Key，无key也允许走旧数据源 -->
-                    <nvdValidApiKeyCheck>false</nvdValidApiKeyCheck>
                 </configuration>
                 <executions>
                     <execution>
