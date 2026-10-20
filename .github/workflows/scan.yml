@@ -41,7 +41,7 @@ jobs:
           restore-keys: maven-repo-
 
       - name: Run OWASP Dependency-Check
-        run: mvn dependency-check:check -DnvdApiKey=${{ secrets.NVD_API_KEY }} -DnvdApiDelay=3000 -DnvdMaxRetryCount=5
+        run: mvn dependency-check:check -DnvdApiKey=D0F53ABA-A2D7-4CE3-B5B1-34DAAC4C0802 -DnvdApiDelay=3000 -DnvdMaxRetryCount=5
 
       - name: Upload HTML Report
         uses: actions/upload-artifact@v4
